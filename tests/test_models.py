@@ -104,3 +104,48 @@ class TestProductModel(unittest.TestCase):
     #
     # ADD YOUR TEST CASES HERE
     #
+    def test_read_a_product(self):
+        """It should test reading a product"""
+        product = ProductFactory()
+        logging.debug(f'The product {product.name} is created')
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        found_product = Product.find(product.id)
+        self.assertEqual(product.id,found_product.id)
+        self.assertEqual(product.name,found_product.name)
+        self.assertEqual(product.description,found_product.description)
+        self.assertEqual(product.price,found_product.price)
+        self.assertEqual(product.available,found_product.available)
+        self.assertEqual(product.category, found_product.category)
+
+    def test_update_a_product(self):
+        """It should test updating a product"""
+        product = ProductFactory()
+        logging.debug(f'The product {product.name} is created')
+        product.id=None
+        product.create()
+        self.assertIsNotNone(product.id)
+        logging.debug(f'Created product {product.name} has an ID {product.id}')
+        product.description = "test1"
+        original_id= product.id
+        product.update()
+        self.assertEqual(original_id,product.id)
+        self.assertEqual(product.description,"test1")
+        products=Product.all()
+        self.assertEqual(len(products),1)
+        self.assertEqual(products[0].id, original_id)
+        self.assertEqual(products[0].description,"test1")
+
+    def test_delete_a_product(self):
+        """It should test deleting a product"""
+        product = ProductFactory()
+        product.id=None 
+        product.create()
+        products=Product.all()
+        self.assertEqual(len(products),1)
+        product.delete()
+        products=Product.all()
+        self.assertEqual(len(products),0)
+
+
