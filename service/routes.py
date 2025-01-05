@@ -25,6 +25,19 @@ from service.common import status  # HTTP Status Codes
 from . import app
 
 
+@app.route("/products", methods=["GET"])
+def get_count():
+    """
+    Return a count of all products and their details.
+    """
+    all_products = Product.all()  # List of serialized products
+    A = {}
+    
+    # Create a dictionary with count as the key and product as the value
+    for i, product in enumerate(all_products):
+        A[i] = 1  # Each product is already a dictionary from Product.all()
+    return jsonify(A), status.HTTP_200_OK
+
 ######################################################################
 # H E A L T H   C H E C K
 ######################################################################
@@ -109,6 +122,19 @@ def create_products():
 #
 # PLACE YOUR CODE HERE TO READ A PRODUCT
 #
+@app.route("/products/<product_id>", methods=["GET"])
+def get_products(product_id):
+    """
+    Reads the product
+    This endpoint returns a product based on an ID
+    """
+    app.logger.info("Request to Retrieve a product with id [%s]", product_id)
+    product = Product.find(product_id)
+    if product is None:
+        return {"message": f"Error: There is no object with ID={product_id}"}, status.HTTP_404_NOT_FOUND
+    data = product.serialize()
+    app.logger.info("Returning product: %s", product.name)
+    return data, status.HTTP_200_OK
 
 ######################################################################
 # U P D A T E   A   P R O D U C T
@@ -118,6 +144,21 @@ def create_products():
 # PLACE YOUR CODE TO UPDATE A PRODUCT HERE
 #
 
+@app.route("/products/<product_id>", methods=["PUT"])
+def update_products(product_id):
+    """
+    Updates the existing product
+    """
+    app.logger.info("Request to Update a product with id [%s]", product_id)
+    check_content_type("application/json")
+    product = Product.find(product_id)
+    if not product:
+        return {"message" : f"Product with ID = {product_id} is not found"}, status.HTTP_404_NOT_FOUND
+    product.deserialize(request.get_json())
+    product.id = product_id
+    product.update()
+    return product.serialize(), status.HTTP_200_OK
+
 ######################################################################
 # D E L E T E   A   P R O D U C T
 ######################################################################
@@ -126,3 +167,17 @@ def create_products():
 #
 # PLACE YOUR CODE TO DELETE A PRODUCT HERE
 #
+
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_products(product_id):
+    """
+    Delete a Product
+    This endpoint will delete a Product based the id specified in the path
+    """
+    app.logger.info("Request to Delete a product with id [%s]", product_id)
+    product = Product.find(product_id)
+    if product:
+        product.delete()
+    return "", status.HTTP_204_NO_CONTENT
+
+###########################################################################
