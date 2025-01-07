@@ -25,9 +25,6 @@ from service.common import status  # HTTP Status Codes
 from . import app
 
 
-
-    
-
 ######################################################################
 # H E A L T H   C H E C K
 ######################################################################
@@ -115,6 +112,7 @@ def list_products():
     products = []
     name = request.args.get("name")
     category = request.args.get("category")
+    available = request.args.get("available")
 
     if name:
         app.logger.info("Find by name: %s", name)
@@ -123,6 +121,10 @@ def list_products():
         app.logger.info("Find by category: %s", category)
         category_value = getattr(Category, category.upper())
         products = Product.find_by_category(category_value)
+    elif available:
+        app.logger.info("Find by available: %s", available)
+        available_value = available.lower() in ["true", "yes", "1"]
+        products = Product.find_by_availability(available_value)
     else:
         app.logger.info("Find all")
         products = Product.all()  # List of serialized products
@@ -138,6 +140,8 @@ def list_products():
 #
 # PLACE YOUR CODE HERE TO READ A PRODUCT
 #
+
+
 @app.route("/products/<product_id>", methods=["GET"])
 def get_products(product_id):
     """
@@ -160,6 +164,7 @@ def get_products(product_id):
 # PLACE YOUR CODE TO UPDATE A PRODUCT HERE
 #
 
+
 @app.route("/products/<product_id>", methods=["PUT"])
 def update_products(product_id):
     """
@@ -169,7 +174,7 @@ def update_products(product_id):
     check_content_type("application/json")
     product = Product.find(product_id)
     if not product:
-        return {"message" : f"Product with ID = {product_id} is not found"}, status.HTTP_404_NOT_FOUND
+        return {"message": f"Product with ID = {product_id} is not found"}, status.HTTP_404_NOT_FOUND
     product.deserialize(request.get_json())
     product.id = product_id
     product.update()
