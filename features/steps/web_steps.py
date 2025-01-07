@@ -106,6 +106,12 @@ def step_impl(context, element_name):
 
 ## UPDATE CODE HERE ##
 
+@when(u'I press the "{button}" button')
+def step_impl(context, button):
+    button_id = button.lower()+'-btn'
+    context.driver.find_element(By.ID, button_id).click()
+
+
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
