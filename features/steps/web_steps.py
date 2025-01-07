@@ -111,6 +111,22 @@ def step_impl(context, button):
     button_id = button.lower()+'-btn'
     context.driver.find_element(By.ID, button_id).click()
 
+@then(u'I should see "{name}" in the results')
+def step_impl(context, name):
+    found = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID,'search_results'),
+            name
+        )
+    )
+    assert(found)
+
+@then(u'I should not see "{name}" in the results')
+def step_impl(context, name):
+    element = context.driver.find_element(By.ID,'search_results')
+    assert(name not in element.text)
+
+    
 
 ##################################################################
 # This code works because of the following naming convention:
